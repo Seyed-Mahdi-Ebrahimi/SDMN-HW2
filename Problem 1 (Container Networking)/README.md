@@ -200,7 +200,7 @@ Before the router and its links were removed, the communication between the diff
 
 But after removing the router, we have to perform a routing operation between different namespaces.
 
-For this purpose, it is necessary to run a number of routing commands in the namespaces of each node and in the root namespace of Linux. In fact, the following command should be executed for each space:
+For this purpose, it is necessary to run a number of routing commands in the namespaces of each node and in the root namespace of Linux. In fact, the following command should be executed for each namespace:
   ```bash
   ip netns exec <namespace> ip route add <different-subnet> dev <veth-of-namespace>
   ```
@@ -232,3 +232,29 @@ For clarity, the actual values are replaced by:
 
 <a id="Q2"></a>
 ## **Question 2**: What if the namespaces are on different servers (virtual machine or physical server)?
+
+In the case that each switch and the hosts connected to it are in a separate virtual machine or physical server, with a number of routing commands, the hosts of two subnets can still ping each other.
+
+In this case, the routing commands of each namespace are the same as [question 1](#Q1).
+But for root namespace roles:
+- For packets that belong to the subnet that is on our current machine: a routing command similar to [question 1](#Q1):
+  ```bash
+  ip route add <subnet> dev <bridge>
+  ```
+
+- But for packets that belong to a subnet located in a virtual machine or another physical server, it must be determined from which interface they should be sent (go out). For this purpose, in the routing command, we must enter the virtual machine or physical server interface:
+  ```bash
+  ip route add <subnet> dev <eth> # 'eth' of VM or physical server
+  ```
+
+Let's assume that subnets `172.0.0.0/24` and `10.10.0.0/24` are in physical servers named `X` and `Y` with ethernet interfaces `ensp172` and `ensp10` respectively. The routing commands that should be executed at the root namespace of each server are as follows:
+
+  ```bash
+  # On server 'X' with ethernet interface 'ensp172'
+  ip route add 172.0.0.0/24 dev br1
+  ip route add 10.10.0.0/24 dev ensp172 # Specifying the interface to which packets of subnet '10.10.0.0/24' should be sent
+
+  # On server 'Y' with ethernet interface 'ensp10'
+  ip route add 10.10.0.0/24 dev br2
+  ip route add 172.0.0.0/24 dev ensp10 # Specifying the interface to which packets of subnet '172.0.0.0/24' should be sent
+  ```
