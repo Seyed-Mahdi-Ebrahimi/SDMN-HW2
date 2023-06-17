@@ -112,4 +112,37 @@ sysctl --write net.bridge.bridge.bridge-nf-call-ip6tables=0
 sysctl --write net.bridge.bridge-nf-call-arptables=0
 sysctl -p # Applying the changes without rebooting
   ```
-  
+
+## pingall.sh
+
+This script is developed to test the accessibility of all network hosts to each other.
+It has been tried to make its output similar to `pingall` command in **Mininet**.
+
+How to run this bash is very simple: `sudo ./pingall.sh`
+
+Two examples of the output results of executing this script.
+
+- All nodes are connected to each other.
+```
+~/sdmn/hw2/q1$ sudo ./pingall.sh 
+*** Testing all nodes reachability
+----------------------------------
+node1 -> node2 node3 node4 
+node2 -> node1 node3 node4 
+node3 -> node1 node2 node4 
+node4 -> node1 node2 node3 
+----------------------------------
+*** Results: 12/12 received
+```
+- Node 3 is disconnected.
+```
+~/sdmn/hw2/q1$ sudo ./pingall.sh 
+*** Testing all nodes reachability
+----------------------------------
+node1 -> node2   X   node4 
+node2 -> node1   X   node4 
+node3 ->   X     X     X   
+node4 -> node1 node2   X   
+----------------------------------
+*** Results: 6/12 received
+```
