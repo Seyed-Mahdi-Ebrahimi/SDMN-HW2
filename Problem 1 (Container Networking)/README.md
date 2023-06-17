@@ -1,7 +1,6 @@
 # Problem 1 (Container Networking)
 In the following, the explanation of problem 1 from HW2 will be given.
 
-
 For this problem, 4 scripts have been developed and 2 questions have been answered.
 
 **If you want, you can jump to the contents of that section by clicking on any of the titles below!**
@@ -14,10 +13,11 @@ For this problem, 4 scripts have been developed and 2 questions have been answer
 - [**Question 2**: What if the namespaces are on different servers ... ?]()
 
 
+<a id="create_net.sh"></a>
 ## create_net.sh
 This script was used to make the following network.
 <div style="text-align:center">
-  <img src="./images/network-topology.PNG" alt="network topology" width="400">
+  <img src="./network-topology.PNG" alt="network topology" width="400">
 </div>
 
 In this script, `ip` command is used with different options to make bridge, namespaces, network interfaces, etc.
@@ -113,6 +113,7 @@ sysctl --write net.bridge.bridge-nf-call-arptables=0
 sysctl -p # Applying the changes without rebooting
   ```
 
+<a id="pingall.sh"></a>
 ## pingall.sh
 
 This script is developed to test the accessibility of all network hosts to each other.
@@ -146,3 +147,28 @@ node4 -> node1 node2   X
 ----------------------------------
 *** Results: 6/12 received
 ```
+
+<a id="ping_node.sh"></a>
+## ping_node.sh
+
+This script is developed to ping an optional node.
+The execution of this script is very simple and as follows:
+  ```bash
+sudo ./ping_node.sh node_A node_B
+  ```
+By running the above command, `node_A` will ping `node_B`.
+
+In this script, there is only one command that is executed, which is as follows:
+  ```bash
+ip netns exec <namespace> ping <ip-address>
+  ```
+The above command is used to send an ICMP Echo Request (ping) to the specified IP address (`<ip-address>`) from within a specific network namespace (`<namespace>`).
+
+Also, in this script, a dictionary is used to map `node_B` to its `<ip-address>`.
+
+A dictionary is very simply defined as:
+  ```bash
+declare -A dictionary # Declare an associative array 
+dictionary["node2"]="172.0.0.3" # Add key-value pairs to the dictionary
+  ```
+
