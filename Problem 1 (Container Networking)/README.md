@@ -9,8 +9,8 @@ For this problem, 4 scripts have been developed and 2 questions have been answer
 - [pingall.sh](#pingall.sh)
 - [ping_node.sh](#ping_node.sh)
 - [del_net.sh](#del_net.sh)
-- [**Question 1**: How are packets routed from one subnet to another when the router is removed?]()
-- [**Question 2**: What if the namespaces are on different servers ... ?]()
+- [**Question 1**: How are packets routed from one subnet to another when the router is removed?](#Q1)
+- [**Question 2**: What if the namespaces are on different servers ... ?](#Q2)
 
 
 <a id="create_net.sh"></a>
@@ -157,9 +157,9 @@ node4 -> node1 node2   X
 This script is developed to ping an optional node.
 The execution of this script is very simple and as follows:
   ```bash
-~/sdmn/hw2/q1$ sudo ./ping_node.sh node_A node_B
+~/sdmn/hw2/q1$ sudo ./ping_node.sh <node_A> <node_B>
   ```
-By running the above command, `node_A` will ping `node_B`.
+By running the above command, `<node_A>` will ping `<node_B>`.
 
 In this script, there is only one command that is executed, which is as follows:
   ```bash
@@ -178,16 +178,57 @@ dictionary["node2"]="172.0.0.3" # Add key-value pairs to the dictionary
 <a id="del_net.sh"></a>
 ## del_net.sh
 
-This script is for clearing the spaces and bridges created by the [`create_net.sh`](#create_net.sh).
+This script is for clearing the namespaces and bridges created by the [`create_net.sh`](#create_net.sh).
 
 This script is very simple and runs as follows:
   ```bash
   ~/sdmn/hw2/q1$ sudo ./del_net.sh
   ```
 
-In this script, the following commands are used to clear bridges and spaces.
+In this script, the following commands are used to clear bridges and namespaces.
   ```bash
 ip link del <bridge> # for example: 'br1' or 'br2'
 ip netns del <namedapce>  # for example: 'node1' or 'node2', ...
   ```
 
+<a id="Q1"></a>
+## **Question 1**: How are packets routed from one subnet to another when the router is removed?
+
+In the situation where the router and all its links are removed, the nodes we defined can still ping each other.
+
+Before the router and its links were removed, the communication between the different subnets was through defining the default gateway in the nodes and finally through the router interfaces.
+
+But after removing the router, we have to perform a routing operation between different namespaces.
+
+For this purpose, it is necessary to run a number of routing commands in the namespaces of each node and in the root namespace of Linux. In fact, the following command should be executed for each space:
+  ```bash
+  ip netns exec <namespace> ip route add <different-subnet> dev <veth-of-namespace>
+  ```
+  - `<namespace>`: The namespace where the node is located.
+  - `<different-subnet>`: A different subnet that the node wants to associate with.
+  - `<veth-of-namespace>`: The interface that is in the node namespace.
+
+For clarity, the actual values are replaced by:
+  ```bash
+  ip netns exec node1 ip route add 10.10.0.0/24 dev n1-veth
+  ip netns exec node2 ip route add 10.10.0.0/24 dev n2-veth
+  ip netns exec node3 ip route add 172.0.0.0/24 dev n3-veth
+  ip netns exec node4 ip route add 172.0.0.0/24 dev n4-veth
+  ```
+
+In the previous commands, we connected the `<veth-of-namespace>` interface to an interface that is connected to a bridge device. This bridge device is located in the root namespace. Therefore, it is enough to enter some route commands in the root namespace so that the packets can reach their destination in another subnet.
+The structure of root commands in the root is as follows:
+  ```bash
+  ip route add <subnet> dev <bridge>
+  ```
+  - `<subnet>`: The subnet we want the packets to reach.
+  - `<bridge>`: The bridge to which the `<subnet>` hosts are connected. (In other words, the bridge from which we want packets destined to `<subnet>` to be sent.)
+
+For clarity, the actual values are replaced by:
+  ```bash
+  ip route add 172.0.0.0/24 dev br1
+  ip route add 10.10.0.0/24 dev br2
+  ```
+
+<a id="Q2"></a>
+## **Question 2**: What if the namespaces are on different servers (virtual machine or physical server)?
