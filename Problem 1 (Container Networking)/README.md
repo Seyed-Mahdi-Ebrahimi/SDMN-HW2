@@ -119,7 +119,10 @@ sysctl -p # Applying the changes without rebooting
 This script is developed to test the accessibility of all network hosts to each other.
 It has been tried to make its output similar to `pingall` command in **Mininet**.
 
-How to run this bash is very simple: `sudo ./pingall.sh`
+Running this bash is very simple:
+```bash
+~/sdmn/hw2/q1$ sudo ./pingall.sh
+```
 
 Two examples of the output results of executing this script.
 
@@ -154,7 +157,7 @@ node4 -> node1 node2   X
 This script is developed to ping an optional node.
 The execution of this script is very simple and as follows:
   ```bash
-sudo ./ping_node.sh node_A node_B
+~/sdmn/hw2/q1$ sudo ./ping_node.sh node_A node_B
   ```
 By running the above command, `node_A` will ping `node_B`.
 
@@ -170,5 +173,21 @@ A dictionary is very simply defined as:
   ```bash
 declare -A dictionary # Declare an associative array 
 dictionary["node2"]="172.0.0.3" # Add key-value pairs to the dictionary
+  ```
+
+<a id="del_net.sh"></a>
+## del_net.sh
+
+This script is for clearing the spaces and bridges created by the [`create_net.sh`](#create_net.sh).
+
+This script is very simple and runs as follows:
+  ```bash
+  ~/sdmn/hw2/q1$ sudo ./del_net.sh
+  ```
+
+In this script, the following commands are used to clear bridges and spaces.
+  ```bash
+ip link del <bridge> # for example: 'br1' or 'br2'
+ip netns del <namedapce>  # for example: 'node1' or 'node2', ...
   ```
 
